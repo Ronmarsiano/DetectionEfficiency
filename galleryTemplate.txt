@@ -273,6 +273,10 @@
               }
             },
             {
+              "columnMatch": "prop",
+              "formatter": 5
+            },
+            {
               "columnMatch": "enabled",
               "formatter": 3,
               "formatOptions": {
