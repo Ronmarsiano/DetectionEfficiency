@@ -14,7 +14,7 @@
       "content": {
         "version": "KqlParameterItem/1.0",
         "crossComponentResources": [
-          "value::all"
+          "{Workspace}"
         ],
         "parameters": [
           {
@@ -23,15 +23,20 @@
             "name": "Subscription",
             "type": 6,
             "isRequired": true,
-            "value": "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05",
+            "query": "Resources\n| summarize Count = count() by subscriptionId\n| order by Count desc\n| extend Rank = row_number()\n| project value = subscriptionId, label = subscriptionId, selected = Rank == 1",
+            "crossComponentResources": [
+              "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourcegroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77"
+            ],
             "typeSettings": {
               "additionalResourceOptions": [],
-              "includeAll": false
+              "showDefault": false
             },
             "timeContext": {
               "durationMs": 0
             },
-            "timeContextFromParameter": "TimeRange"
+            "timeContextFromParameter": "TimeRange",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
           },
           {
             "id": "95a45501-31b5-4ea2-bcb3-eb208e0080e2",
@@ -39,28 +44,15 @@
             "name": "Workspace",
             "type": 5,
             "isRequired": true,
-            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| project id, label = name",
+            "query": "where type =~ \"microsoft.operationalinsights/workspaces\"\r\n| project id",
             "crossComponentResources": [
               "value::all"
             ],
-            "value": "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourceGroups/Contoso77/providers/Microsoft.OperationalInsights/workspaces/Contoso77",
+            "value": "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourceGroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77",
             "typeSettings": {
-              "additionalResourceOptions": []
+              "additionalResourceOptions": [],
+              "showDefault": false
             },
-            "timeContextFromParameter": "TimeRange",
-            "queryType": 1,
-            "resourceType": "microsoft.resourcegraph/resources"
-          },
-          {
-            "id": "2198f0a3-c979-42c7-85b1-7c80443c10f3",
-            "version": "KqlParameterItem/1.0",
-            "name": "resourceGroup",
-            "type": 1,
-            "isRequired": true,
-            "query": "resources\r\n| where type =~ 'microsoft.operationalinsights/workspaces'\r\n| where id == \"{Workspace}\"\r\n| project resourceGroup",
-            "crossComponentResources": [
-              "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourcegroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77"
-            ],
             "timeContextFromParameter": "TimeRange",
             "queryType": 1,
             "resourceType": "microsoft.resourcegraph/resources"
@@ -108,26 +100,12 @@
           {
             "id": "9a199167-2dde-49dd-8f01-23e9d1fa8151",
             "version": "KqlParameterItem/1.0",
-            "name": "InternalWSs",
+            "name": "InternalRG",
             "type": 1,
             "isRequired": true,
-            "query": "SecurityIncident\r\n| take 1\r\n| parse IncidentUrl with * \"/workspaces/\" Workspace \"/\" *\r\n| project Workspace",
-            "isHiddenWhenLocked": true,
-            "timeContext": {
-              "durationMs": 604800000
-            },
-            "queryType": 0,
-            "resourceType": "microsoft.operationalinsights/workspaces"
-          },
-          {
-            "id": "7806fefd-432f-4828-9756-8c0be5c08d07",
-            "version": "KqlParameterItem/1.0",
-            "name": "InternalSub",
-            "type": 1,
-            "isRequired": true,
-            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| take 1\r\n| project subscriptionId",
+            "query": "where type =~ \"microsoft.operationalinsights/workspaces\"\r\n| where id =~  \"{Workspace}\"\r\n| project resourceGroup",
             "crossComponentResources": [
-              "value::selected"
+              "{Workspace}"
             ],
             "isHiddenWhenLocked": true,
             "timeContext": {
@@ -152,6 +130,7 @@
         "style": "tabs",
         "links": [
           {
+            "id": "18c690d7-7cbd-46c1-b677-1f72692d40cd",
             "cellValue": "TAB",
             "linkTarget": "parameter",
             "linkLabel": "Alert Rules",
@@ -160,6 +139,7 @@
             "style": "link"
           },
           {
+            "id": "94d4ab9a-4ec7-4e4b-a69d-b6acb5cccd62",
             "cellValue": "TAB",
             "linkTarget": "parameter",
             "linkLabel": "Alerts",
@@ -167,6 +147,7 @@
             "style": "link"
           },
           {
+            "id": "19b985d3-9819-4d97-aeec-dfc558977b39",
             "cellValue": "TAB",
             "linkTarget": "parameter",
             "linkLabel": "Incidents",
@@ -181,7 +162,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "{\"version\":\"ARMEndpoint/1.0\",\"data\":null,\"headers\":[],\"method\":\"GET\",\"path\":\"/subscriptions/{Subscription:id}/resourceGroups/{resourceGroup}/providers/Microsoft.OperationalInsights/workspaces/{Workspace:name}/providers/Microsoft.SecurityInsights/alertRules\",\"urlParams\":[{\"key\":\"api-version\",\"value\":\"2020-01-01\"}],\"batchDisabled\":false,\"transformers\":[{\"type\":\"jsonpath\",\"settings\":{\"tablePath\":\"$.value\",\"columns\":[{\"path\":\"$.properties.displayName\",\"columnid\":\"RuleName\"},{\"path\":\"$.properties.description\",\"columnid\":\"Description\"},{\"path\":\"$.name\",\"columnid\":\"AlertRuleID\"},{\"path\":\"$.kind\",\"columnid\":\"Kind\"},{\"path\":\"$.properties.productFilter\",\"columnid\":\"ProductName\"},{\"path\":\"$.properties.tactics\",\"columnid\":\"Tactics\"},{\"path\":\"$.properties.enabled\",\"columnid\":\"Status\"},{\"path\":\"$.properties\",\"columnid\":\"prop\"}]}}]}",
+        "query": "{\"version\":\"ARMEndpoint/1.0\",\"data\":null,\"headers\":[],\"method\":\"GET\",\"path\":\"/subscriptions/{Subscription:id}/resourceGroups/{InternalRG}/providers/Microsoft.OperationalInsights/workspaces/{Workspace:name}/providers/Microsoft.SecurityInsights/alertRules\",\"urlParams\":[{\"key\":\"api-version\",\"value\":\"2020-01-01\"}],\"batchDisabled\":false,\"transformers\":[{\"type\":\"jsonpath\",\"settings\":{\"tablePath\":\"$.value\",\"columns\":[{\"path\":\"$.properties.displayName\",\"columnid\":\"RuleName\"},{\"path\":\"$.properties.description\",\"columnid\":\"Description\"},{\"path\":\"$.name\",\"columnid\":\"AlertRuleID\"},{\"path\":\"$.kind\",\"columnid\":\"Kind\"},{\"path\":\"$.properties.productFilter\",\"columnid\":\"ProductName\"},{\"path\":\"$.properties.tactics\",\"columnid\":\"Tactics\"},{\"path\":\"$.properties.enabled\",\"columnid\":\"Status\"},{\"path\":\"$.properties\",\"columnid\":\"prop\"}]}}]}",
         "size": 0,
         "title": "Analytic rules",
         "noDataMessage": "No analytic rules are defined ",
@@ -314,12 +295,22 @@
         "groupType": "editable",
         "items": [
           {
+            "type": 1,
+            "content": {
+              "json": "## Total amount of incidents \nSum of al the incidents over time by all the selected rules"
+            },
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
+            "name": "text - 5"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nlet SecurityAlertFiltered= SecurityAlert\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| project ProductName,ExtendedProperties,SystemAlertId\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=tostring(SingleAnaliticRuleID)\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| where alertText has SingleAnaliticRuleID or isProductMarked(SingleAnaliticRuleID)!=-1;\r\nlet SecurityIncedentFiltered = SecurityIncident\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| project AlertIds,TimeGenerated\r\n| mv-expand AnalyticAlertId=AlertIds\r\n| extend AnalyticAlertId=tostring(AnalyticAlertId);\r\nSecurityAlertFiltered\r\n| join SecurityIncedentFiltered on $left.SystemAlertId==$right.AnalyticAlertId\r\n| project TimeGenerated,SingleAnaliticRuleID\r\n| summarize incedentAmount=count() by bin(TimeGenerated,1h)\r\n",
               "size": 0,
-              "title": "Total amount of Incidents ",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -331,7 +322,18 @@
               "parameterName": "prop",
               "comparison": "isNotEqualTo"
             },
-            "name": "query - 17"
+            "name": "Total amount of Incidents "
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "## Amount of incidents by rules\nFor each of the selected rules displaying the amount of incidents over time"
+            },
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
+            "name": "text - 6"
           },
           {
             "type": 3,
@@ -339,7 +341,6 @@
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nlet SecurityAlertFiltered= SecurityAlert\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| project ProductName,ExtendedProperties,SystemAlertId\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=tostring(SingleAnaliticRuleID)\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| where alertText has SingleAnaliticRuleID or isProductMarked(SingleAnaliticRuleID)!=-1;\r\nlet SecurityIncedentFiltered = SecurityIncident\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| project AlertIds,TimeGenerated\r\n| mv-expand AnalyticAlertId=AlertIds\r\n| extend AnalyticAlertId=tostring(AnalyticAlertId);\r\nSecurityAlertFiltered\r\n| join SecurityIncedentFiltered on $left.SystemAlertId==$right.AnalyticAlertId\r\n| project TimeGenerated,SingleAnaliticRuleID\r\n| summarize incedentAmount=count() by bin(TimeGenerated,1h),SingleAnaliticRuleID\r\n",
               "size": 0,
-              "title": "Incidents created by rules",
               "queryType": 0,
               "resourceType": "microsoft.operationalinsights/workspaces",
               "visualization": "linechart",
@@ -351,7 +352,18 @@
               "parameterName": "prop",
               "comparison": "isNotEqualTo"
             },
-            "name": "query - 16"
+            "name": "Incidents created by rules"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "## Amount of incidents by rule \nFor each of the selected rules the total incidents number genereted on the selected time period by closing status "
+            },
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
+            "name": "text - 7"
           },
           {
             "type": 3,
@@ -359,7 +371,6 @@
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nlet getAmountOfIncedentForRuleId = (classification:string){\r\n    SecurityIncident\r\n    | where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n    | where Classification == classification\r\n    | mv-expand AlertId=AlertIds\r\n    | extend AlertId=tostring(AlertId)\r\n    | join  (SecurityAlert| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}) on $left.AlertId==$right.SystemAlertId\r\n    | mv-expand RuleId=RelatedAnalyticRuleIds\r\n    | extend RuleId=iff(ProductName!= 'Azure Sentinel', ProductName,RuleId)\r\n    | summarize counter=count() by RuleIdentifier=tostring(RuleId)\r\n    | extend RuleId=RuleIdentifier\r\n    | project-away RuleIdentifier\r\n};\r\nlet falsePositiveClassificationTable = getAmountOfIncedentForRuleId(\"FalsePositive\") | extend FalsePositiveCounter=counter | project-away counter;\r\nlet undeterminedClassificationTable = getAmountOfIncedentForRuleId(\"Undetermined\") | extend UndeterminedCounter=counter | project-away counter;\r\nlet benignPositiveClassificationTable = getAmountOfIncedentForRuleId(\"BenignPositive\") | extend BenignPositiveCounter=counter | project-away counter;\r\nlet truePositiveClassificationTable = getAmountOfIncedentForRuleId(\"TruePositive\") | extend TruePositiveCounter=counter | project-away counter;\r\nlet activeIncedentTable = SecurityIncident| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}|where Status == \"Active\" | mv-expand AlertId=AlertIds| extend AlertId=tostring(AlertId)| join  SecurityAlert on $left.AlertId==$right.SystemAlertId| mv-expand RelatedAnalyticRuleIds| extend RuleId= iff(ProductName == 'Azure Sentinel', tostring(RelatedAnalyticRuleIds), ProductName)| summarize counter=count() by RuleId=tostring(RuleId) | extend ActiveIncedentsCounter=counter | project-away counter;\r\nlet newIncedentTable = SecurityIncident| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}| where Status == \"New\" | mv-expand AlertId=AlertIds| extend AlertId=tostring(AlertId)| join  SecurityAlert on $left.AlertId==$right.SystemAlertId| mv-expand RelatedAnalyticRuleIds| extend RuleId= iff(ProductName == 'Azure Sentinel', tostring(RelatedAnalyticRuleIds), ProductName)| summarize counter=count() by RuleId=tostring(RuleId) | extend NewIncedentsCounter=counter | project-away counter;\r\nlet joinByRuleId = (T:(RuleId:string), S:(RuleId:string)){\r\n    T \r\n    | join kind=fullouter S on $left.RuleId == $right.RuleId\r\n    | extend RuleId= iff(RuleId == '', RuleId1,RuleId)\r\n    | project-away RuleId1\r\n};\r\njoinByRuleId(joinByRuleId(joinByRuleId(joinByRuleId(joinByRuleId(falsePositiveClassificationTable, undeterminedClassificationTable) , benignPositiveClassificationTable), truePositiveClassificationTable),activeIncedentTable), newIncedentTable)\r\n| join kind=leftouter  (SecurityAlert\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| where ProductName  ==  'Azure Sentinel'\r\n| extend RuleId = parsejson( tostring(todynamic(ExtendedProperties)['Analytic Rule Ids']))\r\n| mv-expand RuleId=RuleId\r\n| extend RuleId=tostring(RuleId)\r\n| extend RuleName=  tostring(todynamic(ExtendedProperties)['Analytic Rule Name'])\r\n| project RuleId,RuleName\r\n| distinct RuleId,RuleName)\r\n on $left.RuleId==$right.RuleId\r\n| extend RuleName=iff(isempty(RuleName),RuleId,RuleName)\r\n| project-away RuleId1\r\n| where alertText has RuleId or isProductMarked(RuleName)!=-1  \r\n| project-away RuleId\r\n| extend TotalAlerts= iff(isempty(FalsePositiveCounter),0,FalsePositiveCounter) + \r\niff(isempty(UndeterminedCounter),0,UndeterminedCounter)+ \r\niff(isempty(BenignPositiveCounter),0,BenignPositiveCounter)+\r\niff(isempty(TruePositiveCounter),0,TruePositiveCounter) +\r\niff(isempty(ActiveIncedentsCounter),0,ActiveIncedentsCounter) +\r\niff(isempty(NewIncedentsCounter),0,NewIncedentsCounter)\r\n| where TotalAlerts>0\r\n| sort by TotalAlerts desc \r\n| project-away TotalAlerts \r\n",
               "size": 0,
-              "title": "Incedent closing reasons",
               "noDataMessage": "No incedents created",
               "queryType": 0,
               "resourceType": "microsoft.operationalinsights/workspaces",
@@ -372,7 +383,7 @@
               "parameterName": "AlertRuleID",
               "comparison": "isNotEqualTo"
             },
-            "name": "query - 25"
+            "name": "Incedent closing reasons"
           },
           {
             "type": 3,
@@ -400,6 +411,7 @@
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet productText = strcat_array(dynamic([{ProductName}]),\",\");\r\nlet getAmountOfIncedentForRuleId = (classification:string){\r\n    SecurityIncident\r\n    | where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n    | where Classification == classification\r\n    | mv-expand AlertId=AlertIds\r\n    | extend AlertId=tostring(AlertId)\r\n    | join  (SecurityAlert| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}) on $left.AlertId==$right.SystemAlertId\r\n    | mv-expand RuleId=RelatedAnalyticRuleIds\r\n    | extend RuleId=iff(ProductName!= 'Azure Sentinel', ProductName,RuleId)\r\n    | summarize counter=count() by RuleIdentifier=tostring(RuleId)\r\n    | extend RuleId=RuleIdentifier\r\n    | project-away RuleIdentifier\r\n};\r\nlet falsePositiveClassificationTable = getAmountOfIncedentForRuleId(\"FalsePositive\") | extend FalsePositiveCounter=counter | project-away counter;\r\nlet undeterminedClassificationTable = getAmountOfIncedentForRuleId(\"Undetermined\") | extend UndeterminedCounter=counter | project-away counter;\r\nlet benignPositiveClassificationTable = getAmountOfIncedentForRuleId(\"BenignPositive\") | extend BenignPositiveCounter=counter | project-away counter;\r\nlet truePositiveClassificationTable = getAmountOfIncedentForRuleId(\"TruePositive\") | extend TruePositiveCounter=counter | project-away counter;\r\nlet activeIncedentTable = SecurityIncident| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}|where Status == \"Active\" | mv-expand AlertId=AlertIds| extend AlertId=tostring(AlertId)| join  SecurityAlert on $left.AlertId==$right.SystemAlertId| mv-expand RelatedAnalyticRuleIds| extend RuleId= iff(ProductName == 'Azure Sentinel', tostring(RelatedAnalyticRuleIds), ProductName)| summarize counter=count() by RuleId=tostring(RuleId) | extend ActiveIncedentsCounter=counter | project-away counter;\r\nlet newIncedentTable = SecurityIncident| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}| where Status == \"New\" | mv-expand AlertId=AlertIds| extend AlertId=tostring(AlertId)| join  SecurityAlert on $left.AlertId==$right.SystemAlertId| mv-expand RelatedAnalyticRuleIds| extend RuleId= iff(ProductName == 'Azure Sentinel', tostring(RelatedAnalyticRuleIds), ProductName)| summarize counter=count() by RuleId=tostring(RuleId) | extend NewIncedentsCounter=counter | project-away counter;\r\nlet joinByRuleId = (T:(RuleId:string), S:(RuleId:string)){\r\n    T \r\n    | join kind=fullouter S on $left.RuleId == $right.RuleId\r\n    | extend RuleId= iff(RuleId == '', RuleId1,RuleId)\r\n    | project-away RuleId1\r\n};\r\njoinByRuleId(joinByRuleId(joinByRuleId(joinByRuleId(joinByRuleId(falsePositiveClassificationTable, undeterminedClassificationTable) , benignPositiveClassificationTable), truePositiveClassificationTable),activeIncedentTable), newIncedentTable)\r\n| join kind=leftouter  (SecurityAlert\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| where ProductName  ==  'Azure Sentinel'\r\n| extend RuleId = parsejson( tostring(todynamic(ExtendedProperties)['Analytic Rule Ids']))\r\n| mv-expand RuleId=RuleId\r\n| extend RuleId=tostring(RuleId)\r\n| extend RuleName=  tostring(todynamic(ExtendedProperties)['Analytic Rule Name'])\r\n| project RuleId,RuleName\r\n| distinct RuleId,RuleName)\r\n on $left.RuleId==$right.RuleId\r\n| extend RuleName=iff(isempty(RuleName),RuleId,RuleName)\r\n| project-away RuleId1\r\n| where alertText has RuleId or productText has RuleName \r\n| project-away RuleId\r\n| extend TotalAlerts= iff(isempty(FalsePositiveCounter),0,FalsePositiveCounter) + \r\niff(isempty(TruePositiveCounter),0,TruePositiveCounter) \r\n| where TotalAlerts>0\r\n| sort by TotalAlerts desc \r\n| project-away TotalAlerts,UndeterminedCounter,BenignPositiveCounter,ActiveIncedentsCounter",
               "size": 0,
               "title": "True and false positive",
+              "noDataMessage": "No incidents close with \"False positive\" or \"True positive\"",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -437,12 +449,19 @@
         "groupType": "editable",
         "items": [
           {
+            "type": 1,
+            "content": {
+              "json": "## Rules analysis \nthe following metrics populated by the selected rules"
+            },
+            "name": "text - 4"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
               "query": "let getSecurityAlertRulesTable = (){\r\n    let getRuleNameIdTable = (){\r\n        let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n        let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n        let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n        | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n        RuleName=tostring(split(RuleName,',')[x]);\r\n        rulesData\r\n    };\r\n    let GetAlertRuleTable = (){\r\n        let proerties = dynamic([{prop}]);\r\n        let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n        TmpRuleTable\r\n        | mv-expand SingleRuleProperties=proerties\r\n        | project-away MockColumn\r\n        | extend \r\n        Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n        RuleName=tostring(SingleRuleProperties.displayName), \r\n        MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n        Description=SingleRuleProperties.description\r\n        | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n        | project-away SingleRuleProperties\r\n        | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n        | project-away RuleName1,x\r\n    };\r\n    let AlertAmount = materialize( SecurityAlert\r\n    | project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n    | where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n    | extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n    | extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n    | mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n    | extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n    | summarize AlertAmount=count() by SingleAnaliticRuleID\r\n    | extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\n    GetAlertRuleTable()\r\n    | join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n    | project-away SingleAnaliticRuleID\r\n    | extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n    | join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n    | extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n    | project-away AlertAmount1\r\n    | sort by AlertAmount desc\r\n    \r\n    };\r\ngetSecurityAlertRulesTable()\r\n| summarize count() by Product\r\n",
               "size": 2,
-              "title": "Rules by provider",
+              "title": "Selected rules by provider",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -458,28 +477,45 @@
             "name": "query - 18"
           },
           {
-            "type": 3,
+            "type": 12,
             "content": {
-              "version": "KqlItem/1.0",
-              "query": "let MITRE_DEF_TABLE = datatable(Tactic:string)[\"InitialAccess\",\"Execution\",\"Persistence\",\"PrivilegeEscalation\", \"DefenseEvasion\",\"CredentialAccess\",\"Discovery\", \"LateralMovement\",\"Collection\",\"Exfiltration\",\"CommandAndControl\",\"Impact\"];\r\nlet getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1\r\n};\r\nMITRE_DEF_TABLE\r\n| join kind=leftouter (GetAlertRuleTable()\r\n| project MITRE_Tactics\r\n| mv-expand MITRE_Tactics\r\n| extend MITRE_Tactics = tostring(MITRE_Tactics)\r\n| summarize RuleAmount=count() by MITRE_Tactics) on $left.Tactic==$right.MITRE_Tactics\r\n| extend RuleAmount=iff(RuleAmount>0,RuleAmount,0)\r\n| project Tactic,RuleAmount\r\n",
-              "size": 0,
-              "title": "MITRE coverage",
-              "timeContext": {
-                "durationMs": 86400000
-              },
-              "queryType": 0,
-              "resourceType": "microsoft.operationalinsights/workspaces",
-              "visualization": "barchart",
-              "chartSettings": {
-                "createOtherGroup": 100
-              }
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "## Selected rules MITRE coverage\nShowing each rules MITRE tactics populated upon the rule creation.\nWe aspire to have full coverage, for better MITRE coverage use Azure Sentinel templates"
+                  },
+                  "name": "text - 5"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let MITRE_DEF_TABLE = datatable(Tactic:string)[\"InitialAccess\",\"Execution\",\"Persistence\",\"PrivilegeEscalation\", \"DefenseEvasion\",\"CredentialAccess\",\"Discovery\", \"LateralMovement\",\"Collection\",\"Exfiltration\",\"CommandAndControl\",\"Impact\"];\r\nlet getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1\r\n};\r\nMITRE_DEF_TABLE\r\n| join kind=leftouter (GetAlertRuleTable()\r\n| project MITRE_Tactics\r\n| mv-expand MITRE_Tactics\r\n| extend MITRE_Tactics = tostring(MITRE_Tactics)\r\n| summarize RuleAmount=count() by MITRE_Tactics) on $left.Tactic==$right.MITRE_Tactics\r\n| extend RuleAmount=iff(RuleAmount>0,RuleAmount,0)\r\n| project Tactic,RuleAmount\r\n",
+                    "size": 0,
+                    "timeContext": {
+                      "durationMs": 86400000
+                    },
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "barchart",
+                    "chartSettings": {
+                      "createOtherGroup": 100
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "prop",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 15"
+                }
+              ]
             },
             "customWidth": "60",
-            "conditionalVisibility": {
-              "parameterName": "prop",
-              "comparison": "isNotEqualTo"
-            },
-            "name": "query - 15"
+            "name": "MITRE group"
           },
           {
             "type": 3,
@@ -487,7 +523,7 @@
               "version": "KqlItem/1.0",
               "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1\r\n};\r\n let StatusTable = datatable (Status:string)[\"Enabled\",\"Disabled\",\"Auto Disabled\"];\r\nGetAlertRuleTable()\r\n| project Status\r\n| summarize AmountOfRules=count() by Status\r\n| join kind=fullouter StatusTable on $left.Status==$right.Status\r\n| extend Status=Status1\r\n| project Status,AmountOfRules\r\n| extend AmountOfRules=iff(AmountOfRules>0,AmountOfRules,0)\r\n",
               "size": 2,
-              "title": "Rule status distribution",
+              "title": "Selected rules status distribution ",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -524,43 +560,61 @@
             "name": "query - 17"
           },
           {
-            "type": 3,
+            "type": 12,
             "content": {
-              "version": "KqlItem/1.0",
-              "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1,x\r\n};\r\nlet AlertAmount = materialize( SecurityAlert\r\n| project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| summarize AlertAmount=count() by SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\nGetAlertRuleTable()\r\n| join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n| project-away SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n| join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n| extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0)\r\n| project-away AlertAmount1\r\n| sort by AlertAmount desc\r\n| project Status,Product,RuleName,AlertAmount\r\n| where AlertAmount==0 and Status == 'Enabled'\r\n| project Status,RuleName",
-              "size": 0,
-              "timeContext": {
-                "durationMs": 86400000
-              },
-              "queryType": 0,
-              "resourceType": "microsoft.operationalinsights/workspaces",
-              "gridSettings": {
-                "formatters": [
-                  {
-                    "columnMatch": "Status",
-                    "formatter": 18,
-                    "formatOptions": {
-                      "thresholdsOptions": "icons",
-                      "thresholdsGrid": [
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "## Rules that required attention\nDisplaying the selected rules that require attention.\nYou can see here disabled rules and rules that were auto disabled.\nAzure Sentinel will disable rules that violates the scheduled alert rules guidelines "
+                  },
+                  "name": "text - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1,x\r\n};\r\nlet AlertAmount = materialize( SecurityAlert\r\n| project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| summarize AlertAmount=count() by SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\nGetAlertRuleTable()\r\n| join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n| project-away SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n| join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n| extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0)\r\n| project-away AlertAmount1\r\n| sort by AlertAmount desc\r\n| project Status,Product,RuleName,AlertAmount\r\n| where AlertAmount==0 and Status == 'Enabled'\r\n| project Status,RuleName",
+                    "size": 0,
+                    "timeContext": {
+                      "durationMs": 86400000
+                    },
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "gridSettings": {
+                      "formatters": [
                         {
-                          "operator": "Default",
-                          "thresholdValue": null,
-                          "representation": "2",
-                          "text": ""
+                          "columnMatch": "Status",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "2",
+                                "text": ""
+                              }
+                            ],
+                            "customColumnWidthSetting": "11ch"
+                          }
                         }
-                      ],
-                      "customColumnWidthSetting": "11ch"
+                      ]
                     }
-                  }
-                ]
-              }
+                  },
+                  "customWidth": "50",
+                  "conditionalVisibility": {
+                    "parameterName": "prop",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "query - 17"
+                }
+              ]
             },
-            "customWidth": "50",
-            "conditionalVisibility": {
-              "parameterName": "prop",
-              "comparison": "isNotEqualTo"
-            },
-            "name": "query - 17"
+            "customWidth": "60",
+            "name": "rule required attention group"
           }
         ]
       },
@@ -578,12 +632,18 @@
         "groupType": "editable",
         "items": [
           {
+            "type": 1,
+            "content": {
+              "json": "## Total amount of alerts\nSum of al the alerts over time by all the selected rules"
+            },
+            "name": "text - 7"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nSecurityAlert\r\n| project TimeGenerated,ProductName,ExtendedProperties\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| extend RuleName= iff(ProductName==\"Azure Sentinel\",tostring(todynamic(ExtendedProperties)['Analytic Rule Name']),ProductName)\r\n| where isProductMarked(ProductName)!=-1 or ProductName == \"Azure Sentinel\" and  alertText has SingleAnaliticRuleID\r\n| summarize AlertAmount=count() by bin(TimeGenerated,1h)",
               "size": 0,
-              "title": "Total amount of alerts",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -596,7 +656,14 @@
               "parameterName": "prop",
               "comparison": "isNotEqualTo"
             },
-            "name": "query - 11"
+            "name": "Total amount of alerts"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "## Amount of alerts by rules\nFor each of the selected rules displaying the amount of alerts over time"
+            },
+            "name": "text - 8"
           },
           {
             "type": 3,
@@ -604,7 +671,6 @@
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nSecurityAlert\r\n| project TimeGenerated,ProductName,ExtendedProperties\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| extend RuleName= iff(ProductName==\"Azure Sentinel\",tostring(todynamic(ExtendedProperties)['Analytic Rule Name']),ProductName)\r\n| where isProductMarked(ProductName)!=-1 or ProductName == \"Azure Sentinel\" and  alertText has SingleAnaliticRuleID\r\n| summarize AlertAmount=count() by bin(TimeGenerated,1h),SingleAnaliticRuleID,RuleName",
               "size": 0,
-              "title": "Amount of alerts",
               "noDataMessage": "No alerts generated by selected rules",
               "queryType": 0,
               "resourceType": "microsoft.operationalinsights/workspaces",
@@ -623,7 +689,7 @@
               "parameterName": "prop",
               "comparison": "isNotEqualTo"
             },
-            "name": "Alerts over time"
+            "name": "Amount of alerts by rule over time"
           },
           {
             "type": 3,
@@ -631,7 +697,7 @@
               "version": "KqlItem/1.0",
               "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1,x\r\n};\r\nlet AlertAmount = materialize( SecurityAlert\r\n| project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| summarize AlertAmount=count() by SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\nlet contentTable= materialize(GetAlertRuleTable()\r\n| join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n| project-away SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n| join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n| extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0)\r\n| project-away AlertAmount1\r\n| sort by AlertAmount desc\r\n| project Status,Product,RuleName,AlertAmount);\r\ncontentTable\r\n| summarize Amount=countif(AlertAmount > 0)\r\n| extend Type='Alerted'\r\n| join kind=fullouter  \r\n(contentTable | summarize Amount=countif(AlertAmount == 0)\r\n| extend Type='No alerts') on $left.Type==$right.Type\r\n| extend Type = iff(Type=='',Type1,Type), Amount=iff(Amount>0,Amount,Amount1)\r\n| project Type,Amount\r\n\r\n",
               "size": 2,
-              "title": "Alerting disterbution",
+              "title": "Rules alert generation status",
               "timeContext": {
                 "durationMs": 86400000
               },
@@ -817,12 +883,18 @@
             "name": "query - 23"
           },
           {
+            "type": 1,
+            "content": {
+              "json": "## Amount of alert by rule\nFor each of the selected rules the total alert number genereted on the selected time period "
+            },
+            "name": "text - 9"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
               "query": "let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\nlet isProductMarked = (product:string) {\r\n    let productText = strcat_array(dynamic([{ProductName}]),\",\");\r\n    array_index_of(split(productText,'\\\"'),product)\r\n};\r\nSecurityAlert\r\n| project TimeGenerated,ProductName,ExtendedProperties\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AlertRuleName = parsejson(tostring(todynamic(ExtendedProperties)[\"Analytic Rule Name\"]))\r\n| extend AlertRuleIDArray= parsejson(tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| mv-expand SingleAnaliticRuleID=AlertRuleIDArray\r\n| extend SingleAnaliticRuleID=tostring(SingleAnaliticRuleID)\r\n| project SingleAnaliticRuleID,AlertRuleName, ProductName\r\n| where isProductMarked(ProductName)!=-1 or ProductName == \"Azure Sentinel\" and  alertText has SingleAnaliticRuleID\r\n| extend AlertRuleIdentifier = iff(ProductName==\"Azure Sentinel\", tostring(AlertRuleName), tostring(ProductName))\r\n| summarize AlertAmount=count() by AlertRuleIdentifier",
               "size": 0,
-              "title": "Alerts generated by selected rules",
               "noDataMessage": "No alerts created",
               "queryType": 0,
               "resourceType": "microsoft.operationalinsights/workspaces",
@@ -836,7 +908,7 @@
               "parameterName": "AlertRuleID",
               "comparison": "isNotEqualTo"
             },
-            "name": "query - 26"
+            "name": "Alerts generated by selected rules"
           }
         ]
       },
