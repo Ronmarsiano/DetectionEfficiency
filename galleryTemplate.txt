@@ -453,6 +453,10 @@
             "content": {
               "json": "## Rules analysis \nthe following metrics populated by the selected rules"
             },
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
             "name": "text - 4"
           },
           {
@@ -515,6 +519,10 @@
               ]
             },
             "customWidth": "60",
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
             "name": "MITRE group"
           },
           {
@@ -614,6 +622,10 @@
               ]
             },
             "customWidth": "60",
+            "conditionalVisibility": {
+              "parameterName": "prop",
+              "comparison": "isNotEqualTo"
+            },
             "name": "rule required attention group"
           }
         ]
