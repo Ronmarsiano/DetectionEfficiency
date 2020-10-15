@@ -123,7 +123,8 @@
             "typeSettings": {
               "additionalResourceOptions": []
             },
-            "jsonData": "[{ \"value\": \"Yes\", \"label\": \"Yes\"},\r\n {\"value\": \"No\", \"label\": \"No\", \"selected\":true }]"
+            "jsonData": "[{ \"value\": \"Yes\", \"label\": \"Yes\"},\r\n {\"value\": \"No\", \"label\": \"No\", \"selected\":true }]",
+            "value": "Yes"
           }
         ],
         "style": "pills",
@@ -727,6 +728,19 @@
             "name": "text - 7"
           },
           {
+            "type": 1,
+            "content": {
+              "json": "### Help\r\nCounting all the alerts created by the selected rules.\r\nYou can monitor the Alert load on the SOC.\r\n",
+              "style": "info"
+            },
+            "conditionalVisibility": {
+              "parameterName": "Help",
+              "comparison": "isEqualTo",
+              "value": "Yes"
+            },
+            "name": "text - 10"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
@@ -784,37 +798,54 @@
             "name": "Amount of alerts by rule over time"
           },
           {
-            "type": 3,
+            "type": 12,
             "content": {
-              "version": "KqlItem/1.0",
-              "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1,x\r\n};\r\nlet AlertAmount = materialize( SecurityAlert\r\n| project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| summarize AlertAmount=count() by SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\nlet contentTable= materialize(GetAlertRuleTable()\r\n| join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n| project-away SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n| join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n| extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0)\r\n| project-away AlertAmount1\r\n| sort by AlertAmount desc\r\n| project Status,Product,RuleName,AlertAmount);\r\ncontentTable\r\n| summarize Amount=countif(AlertAmount > 0)\r\n| extend Type='Alerted'\r\n| join kind=fullouter  \r\n(contentTable | summarize Amount=countif(AlertAmount == 0)\r\n| extend Type='No alerts') on $left.Type==$right.Type\r\n| extend Type = iff(Type=='',Type1,Type), Amount=iff(Amount>0,Amount,Amount1)\r\n| project Type,Amount\r\n\r\n",
-              "size": 2,
-              "title": "Rules alert generation status",
-              "timeContext": {
-                "durationMs": 86400000
-              },
-              "queryType": 0,
-              "resourceType": "microsoft.operationalinsights/workspaces",
-              "visualization": "piechart",
-              "chartSettings": {
-                "seriesLabelSettings": [
-                  {
-                    "seriesName": "No alerts",
-                    "color": "red"
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "### Alert rules trigger status\r\nDisplay the amount of rules that triggered alerts against the ones that didn't."
                   },
-                  {
-                    "seriesName": "Alerted",
-                    "color": "greenDark"
-                  }
-                ]
-              }
+                  "name": "text - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let getRuleNameIdTable = (){\r\n    let alertText =  strcat_array(dynamic([{AlertRuleID}]),\",\");\r\n    let RuleName =  strcat_array(dynamic([{RuleName}]),\",\");\r\n    let rulesData = range x from 0 to array_length(split(alertText,','))-1 step 1\r\n    | extend AlertRuleId= tostring(split(alertText,',')[x]),\r\n    RuleName=tostring(split(RuleName,',')[x]);\r\n    rulesData\r\n};\r\nlet GetAlertRuleTable = (){\r\n    let proerties = dynamic([{prop}]);\r\n    let TmpRuleTable = datatable (MockColumn:string)[\"Mock\"];\r\n    TmpRuleTable\r\n    | mv-expand SingleRuleProperties=proerties\r\n    | project-away MockColumn\r\n    | extend \r\n    Product=iff(SingleRuleProperties.productFilter!='',SingleRuleProperties.productFilter,\"Azure Sentinel\"), \r\n    RuleName=tostring(SingleRuleProperties.displayName), \r\n    MITRE_Tactics=iff(SingleRuleProperties.tactics!='',SingleRuleProperties.tactics,dynamic([])),\r\n    Description=SingleRuleProperties.description\r\n    | extend Status= iff(SingleRuleProperties.enabled==true,'Enabled',iff(RuleName startswith 'AUTO DISABLED','Auto disabled', 'Disabled'))\r\n    | project-away SingleRuleProperties\r\n    | join getRuleNameIdTable() on $left.RuleName==$right.RuleName\r\n    | project-away RuleName1,x\r\n};\r\nlet AlertAmount = materialize( SecurityAlert\r\n| project ExtendedProperties,ProductName, ProviderName,TimeGenerated\r\n| where TimeGenerated >= {TimeRange:start} and TimeGenerated <= {TimeRange:end}\r\n| extend AnalyticRuleIdStr = replace('\\\"','',tostring(todynamic(ExtendedProperties)[\"Analytic Rule Ids\"]))\r\n| extend AnaliticRulesInAlertArray= split(substring(AnalyticRuleIdStr,1,string_size(AnalyticRuleIdStr)-2),\",\")\r\n| mv-expand SingleAnaliticRuleID=AnaliticRulesInAlertArray\r\n| extend SingleAnaliticRuleID=iff(ProductName==\"Azure Sentinel\",tostring(SingleAnaliticRuleID),ProductName)\r\n| summarize AlertAmount=count() by SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0));\r\nlet contentTable= materialize(GetAlertRuleTable()\r\n| join kind=leftouter AlertAmount on $left.AlertRuleId==$right.SingleAnaliticRuleID \r\n| project-away SingleAnaliticRuleID\r\n| extend AlertAmount=iff(AlertAmount>0 or Product!= 'Azure Sentinel',AlertAmount,0)\r\n| join kind=leftouter AlertAmount on $left.Product==$right.SingleAnaliticRuleID\r\n| extend AlertAmount=iff(Product!= 'Azure Sentinel',AlertAmount1,AlertAmount)\r\n| extend AlertAmount=iff(AlertAmount>0,AlertAmount,0)\r\n| project-away AlertAmount1\r\n| sort by AlertAmount desc\r\n| project Status,Product,RuleName,AlertAmount);\r\ncontentTable\r\n| summarize Amount=countif(AlertAmount > 0)\r\n| extend Type='Alerted'\r\n| join kind=fullouter  \r\n(contentTable | summarize Amount=countif(AlertAmount == 0)\r\n| extend Type='No alerts') on $left.Type==$right.Type\r\n| extend Type = iff(Type=='',Type1,Type), Amount=iff(Amount>0,Amount,Amount1)\r\n| project Type,Amount\r\n\r\n",
+                    "size": 2,
+                    "timeContext": {
+                      "durationMs": 86400000
+                    },
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "piechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "No alerts",
+                          "color": "red"
+                        },
+                        {
+                          "seriesName": "Alerted",
+                          "color": "greenDark"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "prop",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Rules alert generation status"
+                }
+              ]
             },
             "customWidth": "40",
-            "conditionalVisibility": {
-              "parameterName": "prop",
-              "comparison": "isNotEqualTo"
-            },
-            "name": "query - 18"
+            "name": "AlertGenerationGroup"
           },
           {
             "type": 3,
@@ -996,6 +1027,26 @@
               "comparison": "isNotEqualTo"
             },
             "name": "text - 9"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Help\r\nHere you can see the amount of alerts created from each rule you selected. \r\nMonitoring the amount of alert each detection is creating is essential for the SOC.\r\n",
+              "style": "info"
+            },
+            "customWidth": "80",
+            "conditionalVisibilities": [
+              {
+                "parameterName": "Help",
+                "comparison": "isEqualTo",
+                "value": "Yes"
+              },
+              {
+                "parameterName": "prop",
+                "comparison": "isNotEqualTo"
+              }
+            ],
+            "name": "text - 11"
           },
           {
             "type": 3,
