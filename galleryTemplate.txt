@@ -123,8 +123,7 @@
             "typeSettings": {
               "additionalResourceOptions": []
             },
-            "jsonData": "[{ \"value\": \"Yes\", \"label\": \"Yes\"},\r\n {\"value\": \"No\", \"label\": \"No\", \"selected\":true }]",
-            "value": "Yes"
+            "jsonData": "[{ \"value\": \"Yes\", \"label\": \"Yes\"},\r\n {\"value\": \"No\", \"label\": \"No\", \"selected\":true }]"
           }
         ],
         "style": "pills",
@@ -349,6 +348,25 @@
             "name": "text - 5"
           },
           {
+            "type": 1,
+            "content": {
+              "json": "### Help\r\nCounting all the incidents created by the selected rules.\r\nYou can monitor the incidents load on the SOC.\r\n",
+              "style": "info"
+            },
+            "conditionalVisibilities": [
+              {
+                "parameterName": "Help",
+                "comparison": "isEqualTo",
+                "value": "Yes"
+              },
+              {
+                "parameterName": "prop",
+                "comparison": "isNotEqualTo"
+              }
+            ],
+            "name": "text - 7"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
@@ -412,6 +430,24 @@
               "comparison": "isNotEqualTo"
             },
             "name": "text - 7"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Help\r\nHere you can see the amount of incidents created from each rule you selected.\r\nIn addition you can see the distribution of closing reasons for each of the selected rules. \r\nMonitoring the amount of incidents each detection is creating is essential for the SOC.\r\n"
+            },
+            "conditionalVisibilities": [
+              {
+                "parameterName": "Help",
+                "comparison": "isEqualTo",
+                "value": "Yes"
+              },
+              {
+                "parameterName": "prop",
+                "comparison": "isNotEqualTo"
+              }
+            ],
+            "name": "text - 8"
           },
           {
             "type": 3,
@@ -733,11 +769,17 @@
               "json": "### Help\r\nCounting all the alerts created by the selected rules.\r\nYou can monitor the Alert load on the SOC.\r\n",
               "style": "info"
             },
-            "conditionalVisibility": {
-              "parameterName": "Help",
-              "comparison": "isEqualTo",
-              "value": "Yes"
-            },
+            "conditionalVisibilities": [
+              {
+                "parameterName": "Help",
+                "comparison": "isEqualTo",
+                "value": "Yes"
+              },
+              {
+                "parameterName": "prop",
+                "comparison": "isNotEqualTo"
+              }
+            ],
             "name": "text - 10"
           },
           {
