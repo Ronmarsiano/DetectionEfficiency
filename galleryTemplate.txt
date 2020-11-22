@@ -13,17 +13,35 @@
       "type": 9,
       "content": {
         "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "value::all"
+        ],
         "parameters": [
+          {
+            "id": "26d2fea7-3646-4993-b79f-6722f9ef8ddb",
+            "version": "KqlParameterItem/1.0",
+            "name": "DefaultSubscription_Internal",
+            "type": 1,
+            "isRequired": true,
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\n| take 1\n| project subscriptionId",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "isHiddenWhenLocked": true,
+            "timeContextFromParameter": "TimeRange",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
           {
             "id": "55d3ab63-6e1f-4d02-8d9e-2225526689c7",
             "version": "KqlParameterItem/1.0",
             "name": "Subscription",
             "type": 6,
-            "isRequired": true,
-            "query": "Resources\n| summarize Count = count() by subscriptionId\n| order by Count desc\n| extend Rank = row_number()\n| project value = subscriptionId, label = subscriptionId, selected = Rank == 1",
+            "query": "summarize by subscriptionId\n| project value = strcat(\"/subscriptions/\", subscriptionId), label = subscriptionId, selected = iff(subscriptionId =~ '{DefaultSubscription_Internal}', true, false)",
             "crossComponentResources": [
-              "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourcegroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77"
+              "value::all"
             ],
+            "value": "/subscriptions/fdee8146-8bcf-460f-86f3-3f788c285efd",
             "typeSettings": {
               "additionalResourceOptions": [],
               "showDefault": false
@@ -41,11 +59,11 @@
             "name": "Workspace",
             "type": 5,
             "isRequired": true,
-            "query": "where type =~ \"microsoft.operationalinsights/workspaces\"\r\n| project id",
+            "query": "where type =~ \"microsoft.operationalinsights/workspaces\"\r\n| where '{Subscription}' has subscriptionId",
             "crossComponentResources": [
               "value::all"
             ],
-            "value": "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourceGroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77",
+            "value": "/subscriptions/fdee8146-8bcf-460f-86f3-3f788c285efd/resourceGroups/p_romarsia/providers/Microsoft.OperationalInsights/workspaces/romarisa-workspace",
             "typeSettings": {
               "additionalResourceOptions": [],
               "showDefault": false
@@ -62,7 +80,7 @@
             "type": 4,
             "isRequired": true,
             "value": {
-              "durationMs": 604800000
+              "durationMs": 1209600000
             },
             "typeSettings": {
               "selectableValues": [
@@ -127,8 +145,8 @@
           }
         ],
         "style": "pills",
-        "queryType": 0,
-        "resourceType": "microsoft.operationalinsights/workspaces"
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
       },
       "customWidth": "100",
       "name": "parameters - 6"
