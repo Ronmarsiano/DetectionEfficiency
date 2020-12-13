@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "# Detection Efficiency (Preview)"
+        "json": "# Analytics Efficiency (Preview)"
       },
       "customWidth": "35",
       "name": "Page header"
@@ -1228,6 +1228,6 @@
   "fallbackResourceIds": [
     "/subscriptions/3c1bb38c-82e3-4f8d-a115-a7110ba70d05/resourcegroups/contoso77/providers/microsoft.operationalinsights/workspaces/contoso77"
   ],
-  "fromTemplateId": "sentinel-SecurityOperationsEfficiency",
+  "fromTemplateId": "Data-collection-health-monitoring",
   "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
 }
