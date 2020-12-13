@@ -203,9 +203,9 @@
     {
       "type": 1,
       "content": {
-        "json": "### Analytics rules\r\nThis table displays all the analytics rules in the chosen subscription, workspace, and time range. Select rules to analyze based on the selected tab. \r\n\r\n*(Should the tabs be below the table?)*"
+        "json": "### Analytics rules\r\nThis table displays all the analytics rules in the chosen subscription, workspace, and time range. Select rules to analyze based on the selected tab. "
       },
-      "name": "text - 8"
+      "name": "Heading-workbook"
     },
     {
       "type": 1,
