@@ -1,0 +1,22 @@
+{
+ "workbookKey": "AnalyticsEfficiencyWorkbook",
+ 
+ "description": "Gain insights into the efficacy of your analytics rules. In this workbook you can analyze and monitor the analytic rules found in your workspace and achieve better performance by your SOC.",
+ 
+ "dataTypesDependencies": [  ],
+ 
+ "dataConnectorsDependencies": [],//Relevant connectors
+ 
+ "previewImagesFileNames": [ ],//The relative path of the preview images you saved under workbooks/images/previews   ?????
+ 
+ "version": "1.0", // if this is a new workbook - this should be "1.0"
+ 
+ "title": "Analytics efficiency",
+ 
+ "templateRelativePath": "MyNewWorkbook.json",//The relative path of the JSON of the template (the gallery template you saved) ????? 
+ 
+ "subtitle": "",
+ 
+ "provider": "Microsoft"
+ }
+ 
