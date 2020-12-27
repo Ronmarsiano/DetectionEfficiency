@@ -1,15 +1,32 @@
 {
- "workbookKey": "AnalyticsEfficiency",
- "description": "Gain insights into the efficacy of your analytics rules. In this workbook you can analyze and monitor the analytic rules found in your workspace to achieve better performance by your SOC.",
- "logoFileName": "",
- "dataTypesDependencies": [  ],
- "dataConnectorsDependencies": [],
- "previewImagesFileNames": [ "AnalyticsEfficiencyBlack.png","AnalyticsEfficiencyWhite.png"],
- "version": "1.0",
- "title": "Analytics efficiency",
- "templateRelativePath": "AnalyticsEfficiency.json",
- "subtitle": "",
- "provider": "Microsoft",
- "featureFlag": "AnalyticsEfficiency"
- }
- 
+	"lastModifiedUtc": "2020-12-09T09:58:27.2217474Z",
+	"ruleId": "d45a859e-1c6e-4a52-91d1-d071acd5986e",
+	"alertAmoun": 0,
+	"entitis": 5,
+	"entityMappingError": 1,
+	"Reason": ["Entity mapping error entity must be a string"],
+	"threshold": 10,
+	"queryResultAmount": 15,
+	"rulePerformance": {
+		"executionTime": 0.0312015,
+		"datasetStatistics": [{
+			"tableRowCount": 1,
+			"tableSize": 829
+		}]
+	},
+	"incidentConfiguration": {
+		"createIncident": true,
+		"groupingConfiguration": {
+			"enabled": true,
+			"reopenClosedIncident": false,
+			"lookbackDuration": "PT5H",
+			"entitiesMatchingMethod": "Custom",
+			"groupByEntities": ["Account"]
+		}
+	},
+	"suppressionEnabled": false,
+	"suppressionDuration": "PT5H",
+	"queryFrequency": "PT5H",
+	"queryPeriod": "PT5H"
+
+}
